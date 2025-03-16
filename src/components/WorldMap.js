@@ -1,19 +1,50 @@
 import React, { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, GeoJSON,useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
 import countryGeoJSON from "../countries.geo.json";
 import PieChartComponent from "../components/PieChartComponent";
+import Modal from "react-modal";
 
 // CartoDB Positron tile layer for a clean and modern map design
 const TILE_LAYER_URL =
   "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
+
+// Modal styles for smooth UI
+const modalStyles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)", // Dark background for popup
+    backdropFilter: "blur(8px)", // Adds blur effect
+    zIndex: 1000,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  content: {
+    width: "50%",
+    height: "auto",
+    maxWidth: "600px",
+    maxHeight: "80vh",
+    padding: "20px",
+    borderRadius: "12px",
+    background: "rgba(255, 255, 255, 0.95)", // Light, slightly transparent background
+    boxShadow: "0px 10px 25px rgba(0,0,0,0.3)",
+    position: "relative",
+    overflow: "hidden",
+    animation: "fadeIn 0.3s ease-in-out", // Smooth fade-in animation
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+};
 
 export default function WorldMap() {
   const [energyData, setEnergyData] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [countryEnergy, setCountryEnergy] = useState(null);
   const energyDataRef = useRef(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/data/processed_energy_data.json") // Load your processed energy data
@@ -24,7 +55,7 @@ export default function WorldMap() {
         return response.json();
       })
       .then((data) => {
-        // console.log("Fetched data:", data);
+        console.log("Fetched data:", data);
         energyDataRef.current = data;
         setEnergyData(data);
       })
@@ -32,14 +63,6 @@ export default function WorldMap() {
         console.error("Error loading data:", error);
       });
   }, []);
-
-  // // Filter GeoJSON data to only include countries that exist in energyData
-  // const filteredGeoJSON = energyData
-  //   ? countryGeoJSON.features.filter((feature) => {
-  //       const countryName = feature.properties.name;
-  //       return energyData.some((entry) => entry.Country === countryName);
-  //     })
-  //   : [];
 
   const handleCountryClick = (event, feature) => {
     const countryName = feature.properties.name;
@@ -49,17 +72,17 @@ export default function WorldMap() {
     const countryData = energyDataRef.current?.find(
       (entry) => entry.Country === countryName
     );
-   
+
     if (countryData) {
       setCountryEnergy([
         { name: "Renewable", value: countryData["Total Renewable"] },
         { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
       ]);
       console.log(countryData);
+      setModalOpen(true);
     } else {
       setCountryEnergy(null);
     }
-    
   };
 
   // Improved country styling for better map appearance
@@ -74,9 +97,9 @@ export default function WorldMap() {
   return (
     <div>
       <MapContainer
-      scrollWheelZoom={false}
-      // dragging={false} 
-      worldCopyJump={true}  
+        scrollWheelZoom={false}
+        // dragging={false}
+        worldCopyJump={true}
         center={[20, 0]}
         zoom={2}
         className="leaflet-container"
@@ -97,125 +120,34 @@ export default function WorldMap() {
         />
       </MapContainer>
 
-      {/* Displaying selected country energy breakdown */}
-      {selectedCountry && (
-        <div style={{ marginTop: "20px" }}>
-          <h2>{selectedCountry} Energy Breakdown</h2>
-          <PieChartComponent data={countryEnergy} />
-        </div>
-      )}
+      {/* Modal Popup for Pie Chart */}
+      <Modal
+        isOpen={modalOpen}
+        onRequestClose={() => setModalOpen(false)}
+        style={modalStyles}
+        ariaHideApp={false} // To avoid warnings
+      >
+        <button
+          onClick={() => setModalOpen(false)}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            background: "red",
+            color: "white",
+            border: "none",
+            padding: "5px 10px",
+            cursor: "pointer",
+            borderRadius: "5px",
+          }}
+        >
+          Close
+        </button>
+        <h2 style={{ textAlign: "center" }}>
+          {selectedCountry} Energy Breakdown
+        </h2>
+        <PieChartComponent data={countryEnergy} />
+      </Modal>
     </div>
   );
 }
-
-// import React, { useState, useEffect, useRef } from "react";
-// import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
-// import "leaflet/dist/leaflet.css";
-// import countryGeoJSON from "../countries.geo.json";
-// import PieChartComponent from "../components/PieChartComponent";
-
-// // CartoDB Positron tile layer for a clean and modern map design
-// const TILE_LAYER_URL =
-//   "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
-
-// export default function WorldMap() {
-//   const [energyData, setEnergyData] = useState(null);
-//   const [selectedCountry, setSelectedCountry] = useState(null);
-//   const [countryEnergy, setCountryEnergy] = useState(null);
-//   const energyDataRef = useRef(null);
-
-//   useEffect(() => {
-//     fetch("/data/processed_energy_data.json") // Load your processed energy data
-//       .then((response) => {
-//         if (!response.ok) {
-//           throw new Error("Network response was not ok");
-//         }
-//         return response.json();
-//       })
-//       .then((data) => {
-//         // console.log("Fetched data:", data);
-//         energyDataRef.current = data;
-//         setEnergyData(data);
-//       })
-//       .catch((error) => {
-//         console.error("Error loading data:", error);
-//       });
-//   }, []);
-
-//   const handleCountryClick = (event, feature) => {
-//         const countryName = feature.properties.name;
-//         console.log(countryName);
-//         setSelectedCountry(countryName);
-    
-//         const countryData = energyDataRef.current?.find(
-//           (entry) => entry.Country === countryName
-//         );
-       
-//         if (countryData) {
-//           setCountryEnergy([
-//             { name: "Renewable", value: countryData["Total Renewable"] },
-//             { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
-//           ]);
-//           console.log(countryData);
-//         } else {
-//           setCountryEnergy(null);
-//         }
-        
-//       };
-
-//   // Improved country styling based on whether data exists
-//   const getCountryStyle = (feature) => {
-//     const countryName = feature.properties.name;
-//     const isClickable = energyDataRef.current?.some(
-//       (entry) => entry.Country === countryName
-//     );
-
-//     return {
-//       fillColor: isClickable ? "#00b894" : "#b2bec3", // Green for clickable, gray for non-clickable
-//       weight: 1,
-//       color: "#7f8c8d", // Darker border for the countries
-//       fillOpacity: 0.6, // Slight transparency
-//       cursor: isClickable ? "pointer" : "default", // Pointer for clickable, default for non-clickable
-//     };
-//   };
-
-//   return (
-//     <div>
-//       <MapContainer
-//         center={[20, 0]}
-//         zoom={2}
-//         className="leaflet-container"
-//         style={{ height: "90vh", width: "100%" }}
-//       >
-//         {/* CartoDB Positron tile layer */}
-//         <TileLayer url={TILE_LAYER_URL} noWrap={true} />
-
-//         {/* Filtered GeoJSON with selected countries only */}
-//         <GeoJSON
-//           data={countryGeoJSON}
-//           style={getCountryStyle}
-//           onEachFeature={(feature, layer) => {
-//             const countryName = feature.properties.name;
-//             const isClickable = energyDataRef.current?.some(
-//               (entry) => entry.Country === countryName
-//             );
-
-//             if (isClickable) {
-//               layer.on({
-//                 click: (event) => handleCountryClick(event, feature),
-//               });
-//             }
-//           }}
-//         />
-//       </MapContainer>
-
-//       {/* Displaying selected country energy breakdown */}
-//       {selectedCountry && (
-//         <div style={{ marginTop: "20px" }}>
-//           <h2>{selectedCountry} Energy Breakdown</h2>
-//           <PieChartComponent data={countryEnergy} />
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
