@@ -93,8 +93,6 @@ export default function WorldMap() {
         { name: "Renewable", value: countryData["Total Renewable"] },
         { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
        
-        
-
       ]);
       
       setBarData([
@@ -316,6 +314,7 @@ export default function WorldMap() {
             borderRadius: "5px",
           }}
         >
+           
           Close
         </button>
         <h2 style={{ textAlign: "center" }}>
