@@ -16,3 +16,7 @@ code {
   height: 80vh; /* Full screen height */
   width: 100%; /* Full width */
 }
+
+.leaflet-interactive {
+  transition: all 0.3s ease-in-out !important;
+}
