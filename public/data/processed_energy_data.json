@@ -84,7 +84,7 @@
         "Solid biofuels":0.0
     },
     {
-        "Country":"American Samoa",
+        "Country":"United States of America",
         "ISO3 code":"ASM",
         "Region":"Oceania",
         "Total Non-Renewable":3889.367,
@@ -4592,7 +4592,7 @@
         "Solid biofuels":5065.948
     },
     {
-        "Country":"Russian Federation (the)",
+        "Country":"Russia",
         "ISO3 code":"RUS",
         "Region":"Europe",
         "Total Non-Renewable":20432791.3170000017,
@@ -5376,7 +5376,7 @@
         "Solid biofuels":0.0
     },
     {
-        "Country":"Sudan (the)",
+        "Country":"Sudan",
         "ISO3 code":"SDN",
         "Region":"Africa",
         "Total Non-Renewable":84545.036,
