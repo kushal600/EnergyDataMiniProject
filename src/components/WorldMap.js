@@ -40,11 +40,15 @@ const modalStyles = {
 };
 
 export default function WorldMap() {
+  const [energyCountries, setEnergyCountries] = useState([]);
   const [energyData, setEnergyData] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [countryEnergy, setCountryEnergy] = useState(null);
   const energyDataRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [hoveredCountry, setHoveredCountry] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetch("/data/processed_energy_data.json") // Load your processed energy data
@@ -58,6 +62,8 @@ export default function WorldMap() {
         console.log("Fetched data:", data);
         energyDataRef.current = data;
         setEnergyData(data);
+        const countrySet = data.map((entry) => entry.Country);
+        setEnergyCountries(countrySet); // setting available countries from the dataset
       })
       .catch((error) => {
         console.error("Error loading data:", error);
@@ -85,17 +91,135 @@ export default function WorldMap() {
     }
   };
 
-  // Improved country styling for better map appearance
-  const getCountryStyle = (feature) => ({
-    fillColor: "#b2bec3", // Light gray for the countries
-    weight: 1,
-    color: "#7f8c8d", // Darker border for the countries
-    fillOpacity: 0.6, // Slight transparency
-    // cursor: "pointer", // Cursor change to pointer when hovering
-  });
+  const getCountryStyle = (feature) => {
+    const countryName = feature.properties.name;
+    const isInDataset = energyCountries.includes(countryName);
+    const isHovered = hoveredCountry === countryName;
+    return {
+      fillColor: isInDataset ? "#3498db" : "#b2bec3", // Light gray for the countries
+      weight: isHovered ? 2.5 : 1, // Thicker border on hover
+      color: isHovered ? "#2c3e50" : "#7f8c8d", // Darker border on hover
+      fillOpacity: isHovered ? 0.9 : 0.7, // Slight highlight effect
+      transition: "all 0.3s ease-in-out", // Smooth transition
+    };
+  };
 
   return (
     <div>
+      {/* Dropdown with Search Functionality */}
+      {/* <div style={{ marginBottom: "10px", textAlign: "center" }}>
+        <input
+          type="text"
+          placeholder="Search country..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ padding: "8px", width: "200px", marginRight: "5px" }}
+        />
+        <select
+          onChange={(e) => {
+            const selected = e.target.value;
+            if (selected) {
+              handleCountryClick(null, { properties: { name: selected } });
+            }
+          }}
+          style={{ padding: "8px" }}
+        >
+          <option value="">Select a country</option>
+          {energyCountries
+            .filter((country) =>
+              country.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map((country, index) => (
+              <option key={index} value={country}>
+                {country}
+              </option>
+            ))}
+        </select>
+      </div> */}
+      <div
+        style={{
+          textAlign: "center",
+          marginBottom: "10px",
+          position: "relative",
+        }}
+      >
+        <div style={{ display: "inline-block", position: "relative" }}>
+          <input
+            type="text"
+            placeholder="Search country..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setDropdownOpen(true); // Open dropdown when typing
+            }}
+            onFocus={() => setDropdownOpen(true)} // Show dropdown when input is focused
+            style={{
+              padding: "8px",
+              width: "200px",
+              marginRight: "5px",
+              borderRadius: "5px",
+              border: "1px solid #ccc",
+            }}
+          />
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)} // Toggle dropdown on click
+            style={{
+              padding: "8px",
+              cursor: "pointer",
+              background: "white",
+              border: "1px solid #ccc",
+              borderRadius: "5px",
+              marginLeft: "-5px", // Keep button attached to input
+            }}
+          >
+            {dropdownOpen ? "▲" : "▼"} {/* Arrow Toggle */}
+          </button>
+
+          {/* Dropdown List */}
+          {dropdownOpen && (
+            <ul
+              style={{
+                position: "absolute",
+                width: "100%",
+                maxHeight: "150px",
+                overflowY: "auto",
+                listStyleType: "none",
+                padding: "5px",
+                margin: "0",
+                border: "1px solid #ccc",
+                background: "white",
+                borderRadius: "5px",
+                zIndex: 1000,
+              }}
+            >
+              {energyCountries
+                .filter((country) =>
+                  country.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((country, index) => (
+                  <li
+                    key={index}
+                    onClick={() => {
+                      handleCountryClick(null, {
+                        properties: { name: country },
+                      });
+                      setDropdownOpen(false); // Close dropdown on selection
+                      setSearchQuery(country); // Set search bar text
+                    }}
+                    style={{
+                      padding: "8px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid #eee",
+                    }}
+                  >
+                    {country}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
       <MapContainer
         scrollWheelZoom={false}
         // dragging={false}
@@ -113,8 +237,37 @@ export default function WorldMap() {
           data={countryGeoJSON}
           style={getCountryStyle}
           onEachFeature={(feature, layer) => {
+            const countryName = feature.properties.name;
+            // const isInDataset = energyCountries.has(countryName);
+
             layer.on({
               click: (event) => handleCountryClick(event, feature),
+              mouseover: () => {
+                console.log(`Hovered: ${countryName}`); // Debugging
+
+                console.log("inside if condition");
+                setTimeout(() => {
+                  layer.setStyle({
+                    weight: 3,
+                    color: "#2c3e50", // Darker border
+                    fillOpacity: 0.9,
+                  });
+                  layer.bringToFront();
+                }, 10); // Small delay to force re-render
+              },
+
+              mouseout: () => {
+                console.log(`Mouse left: ${countryName}`); // Debugging
+
+                setTimeout(() => {
+                  layer.setStyle({
+                    weight: 1,
+                    color: "#7f8c8d",
+                    fillOpacity: 0.7,
+                  });
+                  layer.bringToBack();
+                }, 10);
+              },
             });
           }}
         />
