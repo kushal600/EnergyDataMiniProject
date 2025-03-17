@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import countryGeoJSON from "../countries.geo.json";
 import PieChartComponent from "../components/PieChartComponent";
 import Modal from "react-modal";
+import Bar from "./Bar";
 
 // CartoDB Positron tile layer for a clean and modern map design
 const TILE_LAYER_URL =
@@ -43,6 +44,7 @@ export default function WorldMap() {
   const [energyData, setEnergyData] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [countryEnergy, setCountryEnergy] = useState(null);
+  const [barData, setBarData] = useState(null);
   const energyDataRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -58,6 +60,8 @@ export default function WorldMap() {
         console.log("Fetched data:", data);
         energyDataRef.current = data;
         setEnergyData(data);
+        setBarData(data);
+        
       })
       .catch((error) => {
         console.error("Error loading data:", error);
@@ -66,22 +70,33 @@ export default function WorldMap() {
 
   const handleCountryClick = (event, feature) => {
     const countryName = feature.properties.name;
-    console.log(countryName);
+   
     setSelectedCountry(countryName);
 
     const countryData = energyDataRef.current?.find(
       (entry) => entry.Country === countryName
     );
-
     if (countryData) {
       setCountryEnergy([
         { name: "Renewable", value: countryData["Total Renewable"] },
         { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
+       
+        
+
       ]);
+      
+      setBarData([
+        { name: "Renewable", value: countryData["Total Renewable"] },
+        { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
+        { name: "Total", value: countryData["Total Energy"] },
+      ]);
+
       console.log(countryData);
       setModalOpen(true);
+
     } else {
       setCountryEnergy(null);
+      setBarData(null);
     }
   };
 
@@ -120,6 +135,7 @@ export default function WorldMap() {
         />
       </MapContainer>
 
+
       {/* Modal Popup for Pie Chart */}
       <Modal
         isOpen={modalOpen}
@@ -148,6 +164,15 @@ export default function WorldMap() {
         </h2>
         <PieChartComponent data={countryEnergy} />
       </Modal>
+
+      {selectedCountry && (
+        <div style={{ marginTop: "20px" }}>
+          <h2>{selectedCountry} Energy Breakdown</h2>
+          <Bar barData={barData} />
+        </div>
+      )}
+
+
     </div>
   );
 }
