@@ -383,6 +383,7 @@ export default function WorldMap() {
           }}
         >
           close
+          
         </button>
         <h2 style={{ textAlign: "center" }}>
           {selectedCountry} Energy Breakdown

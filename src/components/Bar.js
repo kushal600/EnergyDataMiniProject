@@ -22,32 +22,48 @@ ChartJS.register(
 const BarChart = ({ barData }) => {
   console.log("BarData: ", typeof barData);
   const [data_m, setData] = useState([]);
+  const [averageData, setAverageData] = useState({
+    AverageTotalRenewable: 0,
+    AverageTotalNonRenewable: 0,
+    AverageTotalEnergy: 0,
+  });
+
+  // useEffect(() => {
+  //   fetch("/data/processed_energy_data.json")
+  //     .then((response) => response.json())
+  //     .then((data_m) => setData(data_m))
+  //     .catch((error) => console.error("Error loading JSON data:", error));
+  // }, []);
+
+  // const totalEnergyValues = data_m.map((country) => country["Total Energy"]);
+  // const RenewableEnergy = data_m.map(
+  //   (country) => country["Total Non-Renewable"]
+  // );
+  // const NonRenewableEnergy = data_m.map(
+  //   (country) => country["Total Renewable"]
+  // );
+
+  // const average =
+  //   totalEnergyValues.reduce((sum, value) => sum + value, 0) /
+  //   totalEnergyValues.length;
+  // const R_average =
+  //   RenewableEnergy.reduce((sum, value) => sum + value, 0) /
+  //   RenewableEnergy.length;
+  // const N_average =
+  //   NonRenewableEnergy.reduce((sum, value) => sum + value, 0) /
+  //   NonRenewableEnergy.length;
 
   useEffect(() => {
-    fetch("/data/processed_energy_data.json")
+    // Fetch average energy data from the backend
+    fetch("http://localhost:5000/energy-averages")
       .then((response) => response.json())
-      .then((data_m) => setData(data_m))
-      .catch((error) => console.error("Error loading JSON data:", error));
+      .then((data) => {
+        setAverageData(data);
+      })
+      .catch((error) =>
+        console.error("Error fetching energy averages:", error)
+      );
   }, []);
-
-  const totalEnergyValues = data_m.map((country) => country["Total Energy"]);
-  const RenewableEnergy = data_m.map(
-    (country) => country["Total Non-Renewable"]
-  );
-  const NonRenewableEnergy = data_m.map(
-    (country) => country["Total Renewable"]
-  );
-
-  const average =
-    totalEnergyValues.reduce((sum, value) => sum + value, 0) /
-    totalEnergyValues.length;
-  const R_average =
-    RenewableEnergy.reduce((sum, value) => sum + value, 0) /
-    RenewableEnergy.length;
-  const N_average =
-    NonRenewableEnergy.reduce((sum, value) => sum + value, 0) /
-    NonRenewableEnergy.length;
-
   const chartData = {
     labels: ["Total", "Renewable", "Non-Renewable"],
     datasets: [
@@ -62,7 +78,11 @@ const BarChart = ({ barData }) => {
       },
       {
         label: "Average Values",
-        data: [average, R_average, N_average],
+        data: [
+          averageData.AverageTotalEnergy,
+          averageData.AverageTotalRenewable,
+          averageData.AverageTotalNonRenewable,
+        ],
         backgroundColor: "rgba(255, 99, 132, 0.6)",
       },
     ],
