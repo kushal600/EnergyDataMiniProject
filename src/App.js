@@ -9,6 +9,8 @@ function App() {
   const [activeView, setActiveView] = useState("map"); // 'map' or 'summary'
   const [activeSummary, setActiveSummary] = useState("renewable"); // 'renewable', 'nonRenewable', 'violinPlot'
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   return (
     <div className="App">
       <h1>Global Renewable Energy Visualization</h1>
@@ -34,25 +36,46 @@ function App() {
 
       {activeView === "summary" && (
         <div className="summary-container">
-          <div className="btn-group">
+          {/* Dropdown for Summary Selection */}
+          <div className="dropdown">
             <button
-              className={activeSummary === "renewable" ? "active" : ""}
-              onClick={() => setActiveSummary("renewable")}
+              className="dropdown-toggle"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              Renewable Energy
+              {activeSummary === "renewable"
+                ? "Renewable Energy"
+                : activeSummary === "nonRenewable"
+                ? "Non-Renewable Energy"
+                : "Violin Plot"}
             </button>
-            <button
-              className={activeSummary === "nonRenewable" ? "active" : ""}
-              onClick={() => setActiveSummary("nonRenewable")}
-            >
-              Non-Renewable Energy
-            </button>
-            <button
-              className={activeSummary === "violinPlot" ? "active" : ""}
-              onClick={() => setActiveSummary("violinPlot")}
-            >
-              Violin Plot
-            </button>
+            {dropdownOpen && (
+              <div className="dropdown-menu">
+                <div
+                  onClick={() => {
+                    setActiveSummary("renewable");
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Renewable Energy
+                </div>
+                <div
+                  onClick={() => {
+                    setActiveSummary("nonRenewable");
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Non-Renewable Energy
+                </div>
+                <div
+                  onClick={() => {
+                    setActiveSummary("violinPlot");
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Violin Plot
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Conditional Rendering for Summary Components */}
