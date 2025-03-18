@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
-
 import "leaflet/dist/leaflet.css";
 import countryGeoJSON from "../countries.geo.json";
 import PieChartComponent from "../components/PieChartComponent";
@@ -53,6 +52,29 @@ export default function WorldMap() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("pie"); // 'pie' or 'bar'
+  const [selectedRegion, setSelectedRegion] = useState(""); // Region filter
+  const [regions, setRegions] = useState([]);
+  // Fetching regions from the backend API
+  useEffect(() => {
+    fetch("http://localhost:5000/regions") // Fetch regions from API
+      .then((response) => response.json())
+      .then((data) => {
+        setRegions(data); // setting available regions
+      })
+      .catch((error) => console.error("Error fetching regions:", error));
+  }, []);
+
+  // Fetching countries based on selected region
+  useEffect(() => {
+    if (selectedRegion) {
+      fetch(`http://localhost:5000/countries/${selectedRegion}`) // Fetch countries for the selected region
+        .then((response) => response.json())
+        .then((data) => {
+          setEnergyCountries(data); // setting available countries based on region
+        })
+        .catch((error) => console.error("Error fetching countries:", error));
+    }
+  }, [selectedRegion]);
 
   // useEffect(() => {
   //   fetch("/data/processed_energy_data.json") // Load your processed energy data
@@ -158,8 +180,10 @@ export default function WorldMap() {
     const countryName = feature.properties.name;
     const isInDataset = energyCountries.includes(countryName);
     const isHovered = hoveredCountry === countryName;
+
     return {
-      fillColor: isInDataset ? "#3498db" : "#b2bec3", // Light gray for the countries
+      // fillColor: isInDataset ? "#3498db" : "#b2bec3", // Light gray for the countries
+      fillColor: isInDataset ? "#1abc9c" : "#b2bec3", // Light gray for the countries
       weight: isHovered ? 2.5 : 1, // Thicker border on hover
       color: isHovered ? "#2c3e50" : "#7f8c8d", // Darker border on hover
       fillOpacity: isHovered ? 0.9 : 0.7, // Slight highlight effect
@@ -176,6 +200,29 @@ export default function WorldMap() {
           position: "relative",
         }}
       >
+        {/* Region Filter Dropdown */}
+        <select
+          value={selectedRegion}
+          onChange={(e) => {
+            setSelectedRegion(e.target.value);
+            setSearchQuery(""); // Reset search query when changing region
+          }}
+          style={{
+            padding: "8px",
+            marginRight: "5px",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+            fontSize: "1rem",
+          }}
+        >
+          <option value="">Select Region</option>
+          {regions.map((region) => (
+            <option key={region} value={region}>
+              {region}
+            </option>
+          ))}
+        </select>
+
         <div
           style={{
             display: "inline-block",
@@ -335,7 +382,7 @@ export default function WorldMap() {
             borderRadius: "5px",
           }}
         >
-          Close
+          close
         </button>
         <h2 style={{ textAlign: "center" }}>
           {selectedCountry} Energy Breakdown
@@ -346,13 +393,13 @@ export default function WorldMap() {
             className={activeTab === "pie" ? "tab active" : "tab"}
             onClick={() => setActiveTab("pie")}
           >
-            Pie Chart
+            Energy Split
           </button>
           <button
             className={activeTab === "bar" ? "tab active" : "tab"}
             onClick={() => setActiveTab("bar")}
           >
-            Bar Chart
+            Comparison
           </button>
         </div>
 

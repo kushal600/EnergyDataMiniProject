@@ -13,7 +13,10 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Global Renewable Energy Visualization</h1>
+      {activeView === "map" && <h1>Global Renewable Energy Visualization</h1>}
+      {activeView === "summary" && (
+        <h1>Generated Energy Overview Across the Countries</h1>
+      )}
 
       {/* Main Navigation Buttons */}
       <div className="btn-group">
@@ -27,7 +30,7 @@ function App() {
           className={activeView === "summary" ? "active" : ""}
           onClick={() => setActiveView("summary")}
         >
-          Summary Data
+          Energy Summary
         </button>
       </div>
 
@@ -72,7 +75,7 @@ function App() {
                     setDropdownOpen(false);
                   }}
                 >
-                  Violin Plot
+                  Total Energy
                 </div>
               </div>
             )}
