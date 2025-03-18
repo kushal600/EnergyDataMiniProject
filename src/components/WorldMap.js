@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
-
 import "leaflet/dist/leaflet.css";
 import countryGeoJSON from "../countries.geo.json";
 import PieChartComponent from "../components/PieChartComponent";
 import Modal from "react-modal";
 import Bar from "./Bar";
-
 
 // CartoDB Positron tile layer for a clean and modern map design
 const TILE_LAYER_URL =
@@ -26,7 +24,7 @@ const modalStyles = {
     width: "50%",
     height: "auto",
     maxWidth: "600px",
-    maxHeight: "80vh",
+    maxHeight: "90vh",
     padding: "20px",
     borderRadius: "12px",
     background: "rgba(255, 255, 255, 0.95)", // Light, slightly transparent background
@@ -38,6 +36,7 @@ const modalStyles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: "5rem",
   },
 };
 
@@ -53,69 +52,139 @@ export default function WorldMap() {
   const [hoveredCountry, setHoveredCountry] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
-
+  const [activeTab, setActiveTab] = useState("pie"); // 'pie' or 'bar'
+  const [selectedRegion, setSelectedRegion] = useState(""); // Region filter
+  const [regions, setRegions] = useState([]);
+  // Fetching regions from the backend API
   useEffect(() => {
-    fetch("/data/processed_energy_data.json") // Load your processed energy data
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
+    fetch("http://localhost:5000/regions") // Fetch regions from API
+      .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched data:", data);
-        energyDataRef.current = data;
-        setEnergyData(data);
-
-        const countrySet = data.map((entry) => entry.Country);
-        setEnergyCountries(countrySet); // setting available countries from the dataset
-
-        setBarData(data);
-
+        setRegions(data); // setting available regions
       })
-      .catch((error) => {
-        console.error("Error loading data:", error);
-      });
+      .catch((error) => console.error("Error fetching regions:", error));
   }, []);
 
+  // Fetching countries based on selected region
+  useEffect(() => {
+    if (selectedRegion) {
+      fetch(`http://localhost:5000/countries/${selectedRegion}`) // Fetch countries for the selected region
+        .then((response) => response.json())
+        .then((data) => {
+          setEnergyCountries(data); // setting available countries based on region
+        })
+        .catch((error) => console.error("Error fetching countries:", error));
+    }
+  }, [selectedRegion]);
+
+  // useEffect(() => {
+  //   fetch("/data/processed_energy_data.json") // Load your processed energy data
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       console.log("Fetched data:", data);
+  //       energyDataRef.current = data;
+  //       setEnergyData(data);
+
+  //       const countrySet = data.map((entry) => entry.Country);
+  //       setEnergyCountries(countrySet); // setting available countries from the dataset
+
+  //       setBarData(data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error loading data:", error);
+  //     });
+  // }, []);
+
+  //fetching data from backend (just getting all coutries name)
+  useEffect(() => {
+    fetch("http://localhost:5000/countries") // Fetch from API
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Data fetched", data);
+        setEnergyCountries(data); // setting available countries from the dataset
+
+        // setBarData(data);
+      })
+      .catch((error) => console.error("Error fetching countries:", error));
+  }, []);
+
+  // This function is without using backed API
+  // const handleCountryClick = (event, feature) => {
+  //   const countryName = feature.properties.name;
+
+  //   setSelectedCountry(countryName);
+
+  //   const countryData = energyDataRef.current?.find(
+  //     (entry) => entry.Country === countryName
+  //   );
+
+  //   if (countryData) {
+  //     setCountryEnergy([
+  //       { name: "Renewable", value: countryData["Total Renewable"] },
+  //       { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
+  //     ]);
+
+  //     setBarData([
+  //       { name: "Renewable", value: countryData["Total Renewable"] },
+  //       { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
+  //       { name: "Total", value: countryData["Total Energy"] },
+  //     ]);
+
+  //     console.log(countryData);
+  //     setModalOpen(true);
+  //   } else {
+  //     setCountryEnergy(null);
+  //     setBarData(null);
+  //   }
+  // };
   const handleCountryClick = (event, feature) => {
     const countryName = feature.properties.name;
-   
+
     setSelectedCountry(countryName);
 
-    const countryData = energyDataRef.current?.find(
-      (entry) => entry.Country === countryName
-    );
+    fetch(`http://localhost:5000/energy/${countryName}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          setCountryEnergy(null);
+          setBarData(null);
+          return;
+        }
 
-    if (countryData) {
-      setCountryEnergy([
-        { name: "Renewable", value: countryData["Total Renewable"] },
-        { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
-       
-      ]);
-      
-      setBarData([
-        { name: "Renewable", value: countryData["Total Renewable"] },
-        { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
-        { name: "Total", value: countryData["Total Energy"] },
-      ]);
+        setCountryEnergy([
+          { name: "Renewable", value: data.TotalRenewable },
+          { name: "Non-Renewable", value: data.TotalNonRenewable },
+        ]);
 
-      console.log(countryData);
-      setModalOpen(true);
-
-    } else {
-      setCountryEnergy(null);
-      setBarData(null);
-    }
+        setBarData([
+          { name: "Renewable", value: data.TotalRenewable },
+          { name: "Non-Renewable", value: data.TotalNonRenewable },
+          {
+            name: "Total",
+            value: data.TotalEnergy,
+          },
+        ]);
+        setActiveTab("pie"); // Default to Pie Chart when opening modal
+        setModalOpen(true);
+      })
+      .catch((error) => {
+        console.error("Error fetching energy data:", error);
+      });
   };
 
   const getCountryStyle = (feature) => {
     const countryName = feature.properties.name;
     const isInDataset = energyCountries.includes(countryName);
     const isHovered = hoveredCountry === countryName;
+
     return {
-      fillColor: isInDataset ? "#3498db" : "#b2bec3", // Light gray for the countries
+      // fillColor: isInDataset ? "#3498db" : "#b2bec3", // Light gray for the countries
+      fillColor: isInDataset ? "#1abc9c" : "#b2bec3", // Light gray for the countries
       weight: isHovered ? 2.5 : 1, // Thicker border on hover
       color: isHovered ? "#2c3e50" : "#7f8c8d", // Darker border on hover
       fillOpacity: isHovered ? 0.9 : 0.7, // Slight highlight effect
@@ -125,36 +194,6 @@ export default function WorldMap() {
 
   return (
     <div>
-      {/* Dropdown with Search Functionality */}
-      {/* <div style={{ marginBottom: "10px", textAlign: "center" }}>
-        <input
-          type="text"
-          placeholder="Search country..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ padding: "8px", width: "200px", marginRight: "5px" }}
-        />
-        <select
-          onChange={(e) => {
-            const selected = e.target.value;
-            if (selected) {
-              handleCountryClick(null, { properties: { name: selected } });
-            }
-          }}
-          style={{ padding: "8px" }}
-        >
-          <option value="">Select a country</option>
-          {energyCountries
-            .filter((country) =>
-              country.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            .map((country, index) => (
-              <option key={index} value={country}>
-                {country}
-              </option>
-            ))}
-        </select>
-      </div> */}
       <div
         style={{
           textAlign: "center",
@@ -162,7 +201,36 @@ export default function WorldMap() {
           position: "relative",
         }}
       >
-        <div style={{ display: "inline-block", position: "relative" }}>
+        {/* Region Filter Dropdown */}
+        <select
+          value={selectedRegion}
+          onChange={(e) => {
+            setSelectedRegion(e.target.value);
+            setSearchQuery(""); // Reset search query when changing region
+          }}
+          style={{
+            padding: "8px",
+            marginRight: "5px",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+            fontSize: "1rem",
+          }}
+        >
+          <option value="">Select Region</option>
+          {regions.map((region) => (
+            <option key={region} value={region}>
+              {region}
+            </option>
+          ))}
+        </select>
+
+        <div
+          style={{
+            display: "inline-block",
+            position: "relative",
+            fontSize: "1rem",
+          }}
+        >
           <input
             type="text"
             placeholder="Search country..."
@@ -178,6 +246,7 @@ export default function WorldMap() {
               marginRight: "5px",
               borderRadius: "5px",
               border: "1px solid #ccc",
+              fontSize: "1rem",
             }}
           />
           <button
@@ -189,6 +258,8 @@ export default function WorldMap() {
               border: "1px solid #ccc",
               borderRadius: "5px",
               marginLeft: "-5px", // Keep button attached to input
+              color: "#ff416c",
+              fontSize: "1rem",
             }}
           >
             {dropdownOpen ? "▲" : "▼"} {/* Arrow Toggle */}
@@ -197,6 +268,7 @@ export default function WorldMap() {
           {/* Dropdown List */}
           {dropdownOpen && (
             <ul
+              className="dropdown-menu"
               style={{
                 position: "absolute",
                 width: "100%",
@@ -268,7 +340,7 @@ export default function WorldMap() {
                 setTimeout(() => {
                   layer.setStyle({
                     weight: 3,
-                    color: "#2c3e50", // Darker border
+                    color: "#ff416c", // Darker border
                     fillOpacity: 0.9,
                   });
                   layer.bringToFront();
@@ -276,8 +348,6 @@ export default function WorldMap() {
               },
 
               mouseout: () => {
-                console.log(`Mouse left: ${countryName}`); // Debugging
-
                 setTimeout(() => {
                   layer.setStyle({
                     weight: 1,
@@ -291,7 +361,6 @@ export default function WorldMap() {
           }}
         />
       </MapContainer>
-
 
       {/* Modal Popup for Pie Chart */}
       <Modal
@@ -314,24 +383,56 @@ export default function WorldMap() {
             borderRadius: "5px",
           }}
         >
-           
-          Close
+          close
         </button>
         <h2 style={{ textAlign: "center" }}>
           {selectedCountry} Energy Breakdown
         </h2>
-        <PieChartComponent data={countryEnergy} />
+        {/* Tabs for Pie Chart and Bar Chart */}
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <button
+            className={activeTab === "pie" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("pie")}
+          >
+            Energy Split
+          </button>
+          <button
+            className={activeTab === "bar" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("bar")}
+          >
+            Comparison
+          </button>
+        </div>
+
+        {/* Conditional Rendering of Charts */}
+        {activeTab === "pie" && <PieChartComponent data={countryEnergy} />}
+        {activeTab === "bar" && <Bar barData={barData} />}
       </Modal>
 
+      {/* Styles for Tabs */}
+      <style>
+        {`
+          .tab {
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            background: #ecf0f1;
+            transition: all 0.3s ease-in-out;
+          }
 
-      {selectedCountry && (
-        <div style={{ marginTop: "20px" }}>
-          <h2>{selectedCountry} Energy Breakdown</h2>
-          <Bar barData={barData} />
-        </div>
-      )}
+          .tab:hover {
+            background: #bdc3c7;
+          }
 
-
+          .active {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+          }
+        `}
+      </style>
     </div>
   );
 }

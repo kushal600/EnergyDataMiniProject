@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -63,4 +63,133 @@ button.active {
   padding: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   background-color: #fff;
+} */
+
+/* General Page Styling */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f8f9fa; /* Light elegant white */
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* App Container */
+.App {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* Title Styling */
+h1 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 20px;
+}
+
+/* Button Group */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn-group button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 2px solid #ff4b2b;
+  background-color: white;
+  color: #ff416c;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.btn-group button.active {
+  /* background-color: black;   #0078FF*/
+  background-color: #ff416c;
+  color: white;
+  border-radius: 8px;
+}
+
+/* Smooth tab transition */
+.summary-container {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Card for Summary Section */
+.card {
+  background: white;
+  margin-top: 1rem;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dropdown Styling */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background: #00c6ff;
+  color: white;
+  padding: 12px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  outline: none;
+}
+
+.dropdown-toggle:hover {
+  background: #0072ff;
+}
+
+.dropdown-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  width: 200px;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+}
+
+.dropdown-menu div {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.dropdown-menu div:hover {
+  background: #f0f0f0;
 }
