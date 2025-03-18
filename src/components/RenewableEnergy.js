@@ -38,6 +38,11 @@ const RenewableEnergy = () => {
       points: "all", // Show all data points
       jitter: 0.05, // Slight spread for points
       name: "Data", // Legend name (optional)
+      fillcolor: "rgba(26, 188, 156, 0.5)",
+      line: {
+        color: "#1abc9c",
+        width: 2,
+      },
     },
   ];
 

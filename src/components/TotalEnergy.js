@@ -2,7 +2,7 @@ import React from "react";
 import Plot from "react-plotly.js";
 import { useRef, useState, useEffect } from "react";
 
-const ViolinPlot = () => {
+const TotalEnergy = () => {
   // Example array of 224 float values (replace with your actual data)
   //   const dataArray = Array.from({ length: 224 }, () => Math.random() * 10 - 5); // Random floats between -5 and 5
   //   const chartRef = useRef(null);
@@ -61,4 +61,4 @@ const ViolinPlot = () => {
   );
 };
 
-export default ViolinPlot;
+export default TotalEnergy;

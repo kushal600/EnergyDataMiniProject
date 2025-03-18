@@ -24,7 +24,7 @@ const modalStyles = {
     width: "50%",
     height: "auto",
     maxWidth: "600px",
-    maxHeight: "80vh",
+    maxHeight: "90vh",
     padding: "20px",
     borderRadius: "12px",
     background: "rgba(255, 255, 255, 0.95)", // Light, slightly transparent background
@@ -36,6 +36,7 @@ const modalStyles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: "5rem",
   },
 };
 

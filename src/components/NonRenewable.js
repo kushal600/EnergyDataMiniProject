@@ -41,9 +41,9 @@ const NonRenewable = () => {
       points: "all", // Show all data points
       jitter: 0.05, // Slight spread for points
       name: "Data", // Legend name (optional)
-      fillcolor: "rgba(89, 39, 240, 0.6)", // Set the fill color (e.g., tomato red with 60% opacity)
+      fillcolor: "rgba(245, 18, 101, 0.6)", // Set the fill color (e.g., tomato red with 60% opacity)
       line: {
-        color: "rgb(18, 86, 245)", // Outline color (solid tomato red)
+        color: "rgb(245, 18, 101)", // Outline color (solid tomato red)
         width: 2, // Outline width
       },
     },

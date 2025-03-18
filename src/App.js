@@ -3,7 +3,7 @@ import "./App.css";
 import WorldMap from "./components/WorldMap";
 import RenewableEnergy from "./components/RenewableEnergy";
 import NonRenewable from "./components/NonRenewable";
-import ViolinPlot from "./components/TotalEnergy";
+import TotalEnergy from "./components/TotalEnergy";
 
 function App() {
   const [activeView, setActiveView] = useState("map"); // 'map' or 'summary'
@@ -49,7 +49,7 @@ function App() {
                 ? "Renewable Energy"
                 : activeSummary === "nonRenewable"
                 ? "Non-Renewable Energy"
-                : "Violin Plot"}
+                : "Total Energy"}
             </button>
             {dropdownOpen && (
               <div className="dropdown-menu">
@@ -85,7 +85,7 @@ function App() {
           <div className="card">
             {activeSummary === "renewable" && <RenewableEnergy />}
             {activeSummary === "nonRenewable" && <NonRenewable />}
-            {activeSummary === "violinPlot" && <ViolinPlot />}
+            {activeSummary === "violinPlot" && <TotalEnergy />}
           </div>
         </div>
       )}
