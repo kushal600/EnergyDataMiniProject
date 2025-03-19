@@ -1,10 +1,10 @@
 import React from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend, Text } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+const COLORS = ["#0088FE", "#00C49F"];
 
 export default function PieChartComponent({ data }) {
-  // Custom tooltip to show percentage
+  // Custom tooltip to show percentage on hover
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const percent = (
@@ -68,7 +68,7 @@ export default function PieChartComponent({ data }) {
           wrapperStyle={{
             display: "flex",
             justifyContent: "center",
-            width: "100%", // Ensure full width for proper centering
+            width: "100%",
             paddingTop: "10px",
             fontSize: "16px",
             textAlign: "center",

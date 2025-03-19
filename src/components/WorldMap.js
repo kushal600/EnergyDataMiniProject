@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import countryGeoJSON from "../countries.geo.json";
@@ -10,11 +10,11 @@ import Bar from "./Bar";
 const TILE_LAYER_URL =
   "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
 
-// Modal styles for smooth UI
+// Card Modal style
 const modalStyles = {
   overlay: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Dark background for popup
-    backdropFilter: "blur(8px)", // Adds blur effect
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backdropFilter: "blur(8px)",
     zIndex: 1000,
     display: "flex",
     alignItems: "center",
@@ -42,112 +42,56 @@ const modalStyles = {
 
 export default function WorldMap() {
   const [energyCountries, setEnergyCountries] = useState([]);
-  const [energyData, setEnergyData] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [countryEnergy, setCountryEnergy] = useState(null);
   const [barData, setBarData] = useState(null);
-  const energyDataRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
-
   const [hoveredCountry, setHoveredCountry] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("pie"); // 'pie' or 'bar'
-  const [selectedRegion, setSelectedRegion] = useState(""); // Region filter
+  const [activeTab, setActiveTab] = useState("pie");
+  const [selectedRegion, setSelectedRegion] = useState("");
   const [regions, setRegions] = useState([]);
-  // Fetching regions from the backend API
+
+  // Fetching regions from the backend API for filter in the Map
   useEffect(() => {
-    fetch("http://localhost:5000/regions") // Fetch regions from API
+    fetch("http://localhost:5000/regions")
       .then((response) => response.json())
       .then((data) => {
-        setRegions(data); // setting available regions
+        setRegions(data);
       })
       .catch((error) => console.error("Error fetching regions:", error));
   }, []);
 
-  // Fetching countries based on selected region
+  // Fetching countries based on selected region for filter in the Map
   useEffect(() => {
     if (selectedRegion) {
       fetch(`http://localhost:5000/countries/${selectedRegion}`) // Fetch countries for the selected region
         .then((response) => response.json())
         .then((data) => {
-          setEnergyCountries(data); // setting available countries based on region
+          setEnergyCountries(data);
         })
         .catch((error) => console.error("Error fetching countries:", error));
     }
   }, [selectedRegion]);
 
-  // useEffect(() => {
-  //   fetch("/data/processed_energy_data.json") // Load your processed energy data
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((data) => {
-  //       console.log("Fetched data:", data);
-  //       energyDataRef.current = data;
-  //       setEnergyData(data);
-
-  //       const countrySet = data.map((entry) => entry.Country);
-  //       setEnergyCountries(countrySet); // setting available countries from the dataset
-
-  //       setBarData(data);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error loading data:", error);
-  //     });
-  // }, []);
-
-  //fetching data from backend (just getting all coutries name)
+  //fetching all the countries for the Map Coloring
   useEffect(() => {
-    fetch("http://localhost:5000/countries") // Fetch from API
+    fetch("http://localhost:5000/countries")
       .then((response) => response.json())
       .then((data) => {
         console.log("Data fetched", data);
-        setEnergyCountries(data); // setting available countries from the dataset
-
-        // setBarData(data);
+        setEnergyCountries(data);
       })
       .catch((error) => console.error("Error fetching countries:", error));
   }, []);
 
-  // This function is without using backed API
-  // const handleCountryClick = (event, feature) => {
-  //   const countryName = feature.properties.name;
-
-  //   setSelectedCountry(countryName);
-
-  //   const countryData = energyDataRef.current?.find(
-  //     (entry) => entry.Country === countryName
-  //   );
-
-  //   if (countryData) {
-  //     setCountryEnergy([
-  //       { name: "Renewable", value: countryData["Total Renewable"] },
-  //       { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
-  //     ]);
-
-  //     setBarData([
-  //       { name: "Renewable", value: countryData["Total Renewable"] },
-  //       { name: "Non-Renewable", value: countryData["Total Non-Renewable"] },
-  //       { name: "Total", value: countryData["Total Energy"] },
-  //     ]);
-
-  //     console.log(countryData);
-  //     setModalOpen(true);
-  //   } else {
-  //     setCountryEnergy(null);
-  //     setBarData(null);
-  //   }
-  // };
   const handleCountryClick = (event, feature) => {
     const countryName = feature.properties.name;
 
     setSelectedCountry(countryName);
 
-    fetch(`http://localhost:5000/energy/${countryName}`)
+    fetch(`http://localhost:5000/energy/${countryName}`) // fetching specific country Data
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
@@ -183,12 +127,11 @@ export default function WorldMap() {
     const isHovered = hoveredCountry === countryName;
 
     return {
-      // fillColor: isInDataset ? "#3498db" : "#b2bec3", // Light gray for the countries
-      fillColor: isInDataset ? "#1abc9c" : "#b2bec3", // Light gray for the countries
-      weight: isHovered ? 2.5 : 1, // Thicker border on hover
-      color: isHovered ? "#2c3e50" : "#7f8c8d", // Darker border on hover
-      fillOpacity: isHovered ? 0.9 : 0.7, // Slight highlight effect
-      transition: "all 0.3s ease-in-out", // Smooth transition
+      fillColor: isInDataset ? "#1abc9c" : "#b2bec3",
+      weight: isHovered ? 2.5 : 1,
+      color: isHovered ? "#2c3e50" : "#7f8c8d",
+      fillOpacity: isHovered ? 0.9 : 0.7,
+      transition: "all 0.3s ease-in-out",
     };
   };
 
@@ -206,7 +149,7 @@ export default function WorldMap() {
           value={selectedRegion}
           onChange={(e) => {
             setSelectedRegion(e.target.value);
-            setSearchQuery(""); // Reset search query when changing region
+            setSearchQuery("");
           }}
           style={{
             padding: "8px",
@@ -224,6 +167,7 @@ export default function WorldMap() {
           ))}
         </select>
 
+        {/* Search Input */}
         <div
           style={{
             display: "inline-block",
@@ -257,12 +201,12 @@ export default function WorldMap() {
               background: "white",
               border: "1px solid #ccc",
               borderRadius: "5px",
-              marginLeft: "-5px", // Keep button attached to input
+              marginLeft: "-5px",
               color: "#ff416c",
               fontSize: "1rem",
             }}
           >
-            {dropdownOpen ? "▲" : "▼"} {/* Arrow Toggle */}
+            {dropdownOpen ? "▲" : "▼"}
           </button>
 
           {/* Dropdown List */}
@@ -328,19 +272,12 @@ export default function WorldMap() {
           data={countryGeoJSON}
           style={getCountryStyle}
           onEachFeature={(feature, layer) => {
-            const countryName = feature.properties.name;
-            // const isInDataset = energyCountries.has(countryName);
-
             layer.on({
               click: (event) => handleCountryClick(event, feature),
               mouseover: () => {
-                console.log(`Hovered: ${countryName}`); // Debugging
-
-                console.log("inside if condition");
                 setTimeout(() => {
                   layer.setStyle({
                     weight: 3,
-                    color: "#ff416c", // Darker border
                     fillOpacity: 0.9,
                   });
                   layer.bringToFront();

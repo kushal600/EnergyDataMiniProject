@@ -7,7 +7,7 @@ import TotalEnergy from "./components/TotalEnergy";
 
 function App() {
   const [activeView, setActiveView] = useState("map"); // 'map' or 'summary'
-  const [activeSummary, setActiveSummary] = useState("renewable"); // 'renewable', 'nonRenewable', 'violinPlot'
+  const [activeSummary, setActiveSummary] = useState("renewable"); // 'renewable', 'nonRenewable', 'TotalEnergy'
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -18,7 +18,7 @@ function App() {
         <h1>Generated Energy Overview Across the Countries</h1>
       )}
 
-      {/* Main Navigation Buttons */}
+      {/* Main Navigation Buttons, Map or Summary */}
       <div className="btn-group">
         <button
           className={activeView === "map" ? "active" : ""}
