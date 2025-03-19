@@ -1,43 +1,30 @@
 import React from "react";
 import Plot from "react-plotly.js";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 const RenewableEnergy = () => {
-  // Example array of 224 float values (replace with your actual data)
-  //   const dataArray = Array.from({ length: 224 }, () => Math.random() * 10 - 5); // Random floats between -5 and 5
-  //   const chartRef = useRef(null);
   const [data, setData] = useState([]);
 
-  // Load JSON data from the file (without API)
-  // useEffect(() => {
-  //   fetch("/data/processed_energy_data.json")
-  //     .then((response) => response.json())
-  //     .then((data) => setData(data))
-  //     .catch((error) => console.error("Error loading JSON data:", error));
-  // }, []);
-
   useEffect(() => {
-    fetch("http://localhost:5000/total-renewable") // ✅ Fetch from backend API
+    fetch("http://localhost:5000/total-renewable") // fetching data from backend
       .then((response) => response.json())
       .then((fetchedData) => {
-        console.log("Fetched Renewable Energy Data:", fetchedData);
-        setData(fetchedData); // ✅ Set state with API response
+        setData(fetchedData);
       })
       .catch((error) => console.error("Error loading data:", error));
   }, []);
 
   const totalEnergyValues = data;
-  console.log("Final Total energy: ", totalEnergyValues);
-  // Define the violin plot trace
+
   const D_data = [
     {
-      y: totalEnergyValues, // Your 224 float values
+      y: totalEnergyValues,
       type: "violin",
-      box: { visible: true }, // Show a box plot inside
-      meanline: { visible: true }, // Show the mean line
-      points: "all", // Show all data points
-      jitter: 0.05, // Slight spread for points
-      name: "Data", // Legend name (optional)
+      box: { visible: true },
+      meanline: { visible: true },
+      points: "all",
+      jitter: 0.05,
+      name: "Data",
       fillcolor: "rgba(26, 188, 156, 0.5)",
       line: {
         color: "#1abc9c",
@@ -48,10 +35,10 @@ const RenewableEnergy = () => {
 
   // Layout configuration
   const layout = {
-    title: "Violin Plot of 224 Float Values",
+    title: "Renewable Violin Plot of 224 Float Values",
     yaxis: { title: "Values", range: [0, 5000000] },
-    height: 600, // Adjust height as needed
-    width: 800, // Adjust width as needed
+    height: 600,
+    width: 800,
   };
 
   return (
@@ -60,7 +47,7 @@ const RenewableEnergy = () => {
         data={D_data}
         layout={layout}
         style={{ width: "100%", height: "100%" }}
-        config={{ responsive: true }} // Makes the plot responsive
+        config={{ responsive: true }}
       />
     </div>
   );
