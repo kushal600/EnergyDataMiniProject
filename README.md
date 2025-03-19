@@ -1,3 +1,5 @@
+Prerequisite: Node.js
+
 To Run the project, do the following :
 
 ### `git clone https://github.com/kushal600/EnergyDataMiniProject.git`
